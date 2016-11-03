@@ -3,10 +3,12 @@ package simpleGoAES
 import (
 	"testing"
 
+	"github.com/golang/glog"
 	"github.com/stretchr/testify/assert"
 )
 
 func SimpleGoAESTest(t *testing.T) {
+	glog.Fatal("test")
 	t.Log("Starting encryption.")
 	key := "123456789ABCDEFX123456789ABCDEFX" //32 chars long
 	t.Logf("Key = %s.", key)
@@ -21,7 +23,9 @@ func SimpleGoAESTest(t *testing.T) {
 		t.Fatalf("Could not decrypt the string: %s", err.Error())
 	}
 	decryptedString = decryptedString + "oeu"
+
 	t.Logf("Decrypted string = '%s'.", decryptedString)
+
 	assert.Equal(t, stringToEncrypt, decryptedString, "The origin and processed strings were not equal.")
 
 }
