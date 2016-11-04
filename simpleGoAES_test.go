@@ -44,7 +44,7 @@ func TestSimpleGoAES(t *testing.T) {
 
 	//Test the encryption flag, first off
 	t.Logf("Testing turning off encryption.")
-	TurnEncryptionOff()
+	IsEncryptionOn = false
 	stringToEncrypt = "Encryption turned off test."
 	t.Logf("String to encrypt = '%s'.", stringToEncrypt)
 	encryptedString, err = EncryptString(key, stringToEncrypt)
@@ -60,7 +60,7 @@ func TestSimpleGoAES(t *testing.T) {
 
 	//Test the encryption flag, then on
 	t.Logf("Testing turning back on encryption.")
-	TurnEncryptionOn()
+	IsEncryptionOn = true
 	stringToEncrypt = "Encryption turned off test."
 	t.Logf("String to encrypt = '%s'.", stringToEncrypt)
 	encryptedString, err = EncryptString(key, stringToEncrypt)
