@@ -41,4 +41,37 @@ func TestSimpleGoAES(t *testing.T) {
 	t.Logf("Decrypted string = '%s'.", decryptedString)
 
 	assert.Equal(t, stringToEncrypt, decryptedString, "The origin and processed strings were not equal.")
+
+	//Test the encryption flag, first off
+	t.Logf("Testing turning off encryption.")
+	TurnEncryptionOff()
+	stringToEncrypt = "Encryption turned off test."
+	t.Logf("String to encrypt = '%s'.", stringToEncrypt)
+	encryptedString, err = EncryptString(key, stringToEncrypt)
+	if err != nil {
+		t.Fatalf("Could not encrypt the string: %s", err.Error())
+	}
+	decryptedString, err = DecryptString(key, encryptedString)
+	if err != nil {
+		t.Fatalf("Could not decrypt the string: %s", err.Error())
+	}
+	t.Logf("Decrypted string = '%s'.", decryptedString)
+	assert.Equal(t, stringToEncrypt, decryptedString, "The origin and processed strings were not equal.")
+
+	//Test the encryption flag, then on
+	t.Logf("Testing turning back on encryption.")
+	TurnEncryptionOn()
+	stringToEncrypt = "Encryption turned off test."
+	t.Logf("String to encrypt = '%s'.", stringToEncrypt)
+	encryptedString, err = EncryptString(key, stringToEncrypt)
+	if err != nil {
+		t.Fatalf("Could not encrypt the string: %s", err.Error())
+	}
+	decryptedString, err = DecryptString(key, encryptedString)
+	if err != nil {
+		t.Fatalf("Could not decrypt the string: %s", err.Error())
+	}
+	t.Logf("Decrypted string = '%s'.", decryptedString)
+	assert.Equal(t, stringToEncrypt, decryptedString, "The origin and processed strings were not equal.")
+
 }
