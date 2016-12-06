@@ -7,6 +7,8 @@ import (
 	"encoding/base64"
 	"errors"
 	"io"
+
+	"github.com/golang/glog"
 )
 
 // We learned quite a bit from this post http://stackoverflow.com/questions/18817336/golang-encrypting-a-string-with-aes-and-base64 (Intermernet's answer)
@@ -14,21 +16,32 @@ import (
 //IsEncryptionOn : A simple system for turning on and off encryption in case you need to see the plain text results in a database for testing (default is On)
 var IsEncryptionOn = true
 
-//EncryptString : AES256 encryption function to work with strings
+//EncryptStringToBase64EncodedString : AES256 encryption function to work with strings
+//returns a base64 encoded string
 //(depends on EncryptByteArray)
-func EncryptString(key, stringToEncrypt string) (string, error) {
+func EncryptStringToBase64EncodedString(key, stringToEncrypt string) (base64String string, err error) {
+	if IsEncryptionOn == false {
+		return stringToEncrypt, nil
+	}
 	keyBytes := []byte(key)
 	stringToEncryptBytes := []byte(stringToEncrypt)
 	encryptedByteArray, err := EncryptByteArray(keyBytes, stringToEncryptBytes)
-	encryptedString := string(encryptedByteArray[:len(encryptedByteArray)])
+	encryptedString := base64.StdEncoding.EncodeToString(encryptedByteArray)
 	return encryptedString, err
 }
 
-//DecryptString : AES256 decryption function to work with strings
+//DecryptBase64StringToString : AES256 decryption function to work with strings
 //(depends on DecryptByteArray)
-func DecryptString(key, stringToDecrypt string) (string, error) {
+func DecryptBase64StringToString(key, base64StringToDecrypt string) (decodedString string, err error) {
+	if IsEncryptionOn == false {
+		return base64StringToDecrypt, nil
+	}
 	keyBytes := []byte(key)
-	stringToDecryptBytes := []byte(stringToDecrypt)
+	stringToDecryptBytes, err := base64.StdEncoding.DecodeString(base64StringToDecrypt)
+	if err != nil {
+		glog.Error(err)
+		return "", err
+	}
 	decryptedByteArray, err := DecryptByteArray(keyBytes, stringToDecryptBytes)
 	decryptedString := string(decryptedByteArray[:len(decryptedByteArray)])
 	return decryptedString, err
@@ -41,14 +54,13 @@ func EncryptByteArray(key, byteArrayToEncrypt []byte) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		b := base64.StdEncoding.EncodeToString(byteArrayToEncrypt)
-		ciphertext := make([]byte, aes.BlockSize+len(b))
+		ciphertext := make([]byte, aes.BlockSize+len(byteArrayToEncrypt))
 		iv := ciphertext[:aes.BlockSize]
 		if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 			return nil, err
 		}
 		cfb := cipher.NewCFBEncrypter(block, iv)
-		cfb.XORKeyStream(ciphertext[aes.BlockSize:], []byte(b))
+		cfb.XORKeyStream(ciphertext[aes.BlockSize:], []byte(byteArrayToEncrypt))
 		return ciphertext, nil
 	}
 	// Encryption was off, just return the string
@@ -69,11 +81,7 @@ func DecryptByteArray(key, byteArrayToDecrypt []byte) ([]byte, error) {
 		byteArrayToDecrypt = byteArrayToDecrypt[aes.BlockSize:]
 		cfb := cipher.NewCFBDecrypter(block, iv)
 		cfb.XORKeyStream(byteArrayToDecrypt, byteArrayToDecrypt)
-		data, err := base64.StdEncoding.DecodeString(string(byteArrayToDecrypt))
-		if err != nil {
-			return nil, err
-		}
-		return data, nil
+		return byteArrayToDecrypt, nil
 	}
 	return byteArrayToDecrypt, nil
 }
