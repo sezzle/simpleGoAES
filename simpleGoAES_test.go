@@ -3,14 +3,9 @@ package simpleGoAES
 import (
 	"math/rand"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 var runes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.!@#$%^&*(){},=-;")
 var keyLength = 32
